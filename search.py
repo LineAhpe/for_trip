@@ -1,7 +1,6 @@
 import requests
 from datetime import timedelta
 import json
-from bs4 import BeautifulSoup
 from googletrans import Translator
 from datetime import datetime, timedelta
 import random

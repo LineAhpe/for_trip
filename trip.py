@@ -96,7 +96,12 @@ def handle_date(message):
     user_data['state'] = 'ready_for_search'
     origin = city_code_search(user_data['departure_city'])
     destination = city_code_search(user_data['destination_city'])
-    departure_date = parse_date(message.text) 
+    departure_date = parse_date(message.text)
+
+    if not departure_date:
+        text = randomize_replica("errors", "dates_error")
+        bot.send_message(message.chat.id, text)
+        return
 
     flights = search_flights(origin, destination, departure_date)
     if flights:
@@ -123,7 +128,7 @@ def handle_date(message):
         bot.send_message(message.chat.id, text, reply_markup=markup)
     else:
         markup = types.InlineKeyboardMarkup()
-        text = randomize_replica("errors", "dates_error")
+        text = randomize_replica("errors", "flight_train_error")
         button_back_menu = types.InlineKeyboardButton(text='Вернуться в меню', callback_data='menu')
         markup.add(button_back_menu)
         bot.send_message(message.chat.id, text, reply_markup=markup)
@@ -178,7 +183,12 @@ def handle_date(message):
     user_data['state'] = 'ready_for_search'
     origin = city_search_c_code(user_data['departure_city'])
     destination = city_search_c_code(user_data['destination_city'])
-    departure_date = parse_date(message.text)  
+    departure_date = parse_date(message.text)
+
+    if not departure_date:
+        text = randomize_replica("errors", "dates_error")
+        bot.send_message(message.chat.id, text)
+        return
 
     train = search_train(origin, destination, departure_date)
     if train:
@@ -206,7 +216,7 @@ def handle_date(message):
             bot.send_message(message.chat.id, "К сожалению, рейсы не найдены. Попробуйте изменить параметры поиска.")
     else:
         markup = types.InlineKeyboardMarkup()
-        text = randomize_replica("errors", "dates_error")
+        text = randomize_replica("errors", "flight_train_error")
         button_back_menu = types.InlineKeyboardButton(text='Вернуться в меню', callback_data='menu')
         markup.add(button_back_menu)
         bot.send_message(message.chat.id, text, reply_markup=markup)
@@ -264,8 +274,9 @@ def handle_date(message):
     hotel_data_in = user_data['hotel_data_in']
     hotel_data_out = parse_date(message.text)
 
-    if not hotel_data_in:
-        bot.send_message(message.chat.id, "Неверный формат даты. Пожалуйста, введите дату ещё раз, например '15 июня'.")
+    if not hotel_data_out:
+        text = randomize_replica("errors", "dates_error")
+        bot.send_message(message.chat.id, text)
         return
 
     hotels = search_hotels(city_hotel, hotel_data_in, hotel_data_out)
@@ -288,10 +299,11 @@ def handle_date(message):
         bot.send_message(message.chat.id, text, reply_markup=markup)
     else:
         markup = types.InlineKeyboardMarkup()
-        text = randomize_replica("errors", "dates_error")
+        text = randomize_replica("errors", "hotel_error")
         button_back_menu = types.InlineKeyboardButton(text='Вернуться в меню', callback_data='menu')
         markup.add(button_back_menu)
         bot.send_message(message.chat.id, text, reply_markup=markup)
+        print (hotel_data_out)
 
 
 # Обработчик для всех остальных сообщений
