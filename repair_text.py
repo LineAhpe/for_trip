@@ -3,51 +3,41 @@ import datetime
 import re
 from fuzzywuzzy import process
 
-def repair_data(data_value):
-    now = datetime.now()
-    if 'day' in data_value:
-        if data_value['day_is_relative']:
-            now = now + timedelta(days=int(data_value['day']))
-        else:
-            now = now.replace(day=int(data_value['day']))
 
-    if "month" in data_value:
-        month_p = int(data_value['month'])
-        if data_value['month_is_relative']:
-            if month_p + now.month > 12:
-                now = now.replace(year=month_p//12+now.year)
-                now = now.replace(month=month_p%12+now.month)
-            else:
-                now = now.replace(month=month_p+now.month)
-        else:
-            now = now.replace(month=month_p)
-    if "year" in data_value:
-        if data_value['year_is_relative']:
-            now = now.replace(year=int(data_value['year']) + now.year)
-        else:
-            now = now.replace(year=int(data_value['year']))
-
-    data = now.strftime('%Y-%m-%d')
-    return data
-
-# Словарь для перевода русских названий месяцев на английские
+# Перевод месяцев с русского на английский
 month_translation = {
-    'января': 'January',
-    'февраля': 'February',
-    'марта': 'March',
-    'апреля': 'April',
-    'мая': 'May',
-    'июня': 'June',
-    'июля': 'July',
-    'августа': 'August',
-    'сентября': 'September',
-    'октября': 'October',
-    'ноября': 'November',
-    'декабря': 'December'
+    'января': 'January', 'февраля': 'February', 'марта': 'March',
+    'апреля': 'April', 'мая': 'May', 'июня': 'June',
+    'июля': 'July', 'августа': 'August', 'сентября': 'September',
+    'октября': 'October', 'ноября': 'November', 'декабря': 'December'
 }
 
 def parse_date(date_str):
-    # Разделяем строку на день и месяц
+    date_str = date_str.strip().lower()
+    
+    # Проверяем на специальные случаи
+    if date_str == "сегодня":
+        return datetime.datetime.now().strftime('%Y-%m-%d')
+    elif date_str == "завтра":
+        return (datetime.datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+    elif date_str == "послезавтра":
+        return (datetime.datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
+    
+    # Проверяем формат yyyy-mm-dd
+    try:
+        date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        return date_str  # Уже в правильном формате
+    except ValueError:
+        pass
+    
+    # Проверяем формат dd-mm-yyyy
+    try:
+        date_obj = datetime.datetime.strptime(date_str, '%d-%m-%Y')
+        return date_obj.strftime('%Y-%m-%d')
+    except ValueError:
+        pass
+    
+    # Обрабатываем формат "день месяц"
     parts = date_str.split()
     if len(parts) != 2:
         return "Некорректная дата"
@@ -55,7 +45,7 @@ def parse_date(date_str):
     day, month = parts
     
     # Переводим русский месяц на английский
-    month_en = month_translation.get(month.lower())
+    month_en = month_translation.get(month)
     if not month_en:
         return "Некорректная дата"
     
@@ -71,4 +61,4 @@ def parse_date(date_str):
         # Возвращаем дату в формате yyyy-mm-dd
         return date_obj.strftime('%Y-%m-%d')
     except ValueError:
-        return None
+        return "Некорректная дата"
