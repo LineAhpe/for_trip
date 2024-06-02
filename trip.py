@@ -7,6 +7,7 @@ from search import search_flights, search_train, search_hotels
 from city import city_code_search, city_search_c_code
 from repair_text import parse_date
 from random_replicas import randomize_replica
+import time
 
 
 # Загрузка переменных окружения из .env файла
@@ -324,4 +325,10 @@ def echo_all(message):
 
 
 # Запуск бота
-bot.polling()
+if __name__ == '__main__':
+    while True:
+        try:
+            bot.polling(none_stop=True)
+        except Exception as e:
+            time.sleep(3)
+            print(e)
